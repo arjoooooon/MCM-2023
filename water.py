@@ -47,7 +47,7 @@ def water(intialWater, startT, time, Area, xH, xW ):
             X1 += xH[2]-1
         elif X1 != 0:
             fTemp += random.randint(-4,4)
-            pressure=  pressure *1.01
+            pressure=  pressure 
             deltaT = abs(fTemp -iTemp)#how much the temp changes
             X1 += -1
             if X1 == 0:
@@ -94,31 +94,21 @@ def water(intialWater, startT, time, Area, xH, xW ):
             plant =0
         if dcount != 0:
             intialWater= 0
-        elif intialWater > Area*975:
+        elif intialWater > Area*1000:
             intialWater= intialWater- dis[0] -plant
         else:
             intialWater= intialWater- dis[0] +rained -plant #water changes based on water in the system minus the evap plus rain fall and minus the amount absobed by pkants
         ratio1= intialWater/Area
-        waterlist.append(ratio1/1000)
+        if ratio1/1000 > float(1):
+            wfps= 1
+        else:
+            wfps = ratio1/1000
+        waterlist.append(wfps)
         xlist.append(8*step)
         #if there is no water in the system we are basically fucked
         if intialWater < Area*50:
             dcount= 1
-    #plt.title("Temp")
-    #plt.xlabel("Time (H)")
-    #plt.ylabel("Temperature (K)")
-    #plt.plot(xlist, tL)
-    
-    #plt.show()
-    plt.title("WFPS")
-    plt.xlabel("Time (H)")
-    plt.ylabel("WFPS (%)")
-    plt.plot(xlist, waterlist)
-    plt.show()
     #after simulating the timestep we will return the final amount of water in the system.
-    ratio = intialWater/Area
-    norm = ratio/1000
-
     return waterlist
 
 #Helper Functions
@@ -131,13 +121,13 @@ def evaporation(airDensity, deltaT, specificHeat, thermalRes, Area, heatCap, tim
     numer =airDensity*specificHeat * deltaT
     latentHeatLost = Area * numer /thermalRes  #calcs the latent heat lost
     Waterloss = latentHeatLost *time*60*heatCap #caculates the water loss
-    pressure= pressure *.9999
+    pressure= pressure 
     return (Waterloss,pressure)
 
 def rain(alpha,beta, time, pressure):
     "Takes rain in possion parameter for rainfall and simulates potential rainfall for a unit of area"
     fall= time*int(np.random.gamma(alpha, beta, 1))
-    pressure = pressure*1.01
+    pressure = pressure 
     return (fall,pressure)
 
 def Temp(hours, startingday):
@@ -157,25 +147,10 @@ def Temp(hours, startingday):
 
 def Xheat(temp, Intensity, pressure):
     newtemp= int(temp + (Intensity*random.randint(4,7)) )
-    pressure = pressure*.991
+    pressure = pressure 
     return (newtemp, pressure)
 
 def Xrain(alpha, beta , pressure, time):
     fall = rain(alpha,beta, time, pressure)
-    fall = [beta*beta*fall[0], fall[1] ]
+    fall = [beta*beta*fall[0], fall[1]*.98 ]
     return fall
-
-#Testing function (not important to try and run)
-
-def averageW(intial, time, trials):
-    total= 0
-    totalw=0 
-    dTot= 0
-    for i in range(trials):
-        total = water(intial, 0, time, 0, [.005,1.2,3], [.75, 9,10] ) 
-        if total == "DEATH":
-            dTot += 1
-        else:
-            totalw += total
-
-    return (totalw/trials, dTot)
