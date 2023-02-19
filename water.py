@@ -27,9 +27,11 @@ def water(intialWater, startT, time, Area, xH, xW ):
     waterlist = [ratio0/975]
     xlist= [0]
     tL = [263]
+    dcount= 0 #if the system has died
     X1= 0 #Current length left of extreme temp
     X2= 0 #Current length left of extreme rain
     X3 =0 #are we leaving a drought
+    xW[0]= .75+ (xW[0])*.25 #normalizes the rain function
 
     for step in range(0,numstep): #for each time step
 
@@ -68,7 +70,7 @@ def water(intialWater, startT, time, Area, xH, xW ):
         adjust = 2*pressure
         rainchance= random.randint(0,1000) + adjust
         if rainchance > 950:
-            if random.randint(0,1000)/1000/xW[2] < xW[0] and X1 == 0:
+            if random.randint(0,1000)/1000 < xW[0] and X1 == 0:
                 fall = Xrain(xW[2],xW[0], pressure, timestep)
                 X2 += xW[2]-1
             elif X2 != 0:
@@ -90,7 +92,9 @@ def water(intialWater, startT, time, Area, xH, xW ):
             plant= Area *2.5
         else:
             plant =0
-        if intialWater > Area*975:
+        if dcount != 0:
+            intialWater= 0
+        elif intialWater > Area*975:
             intialWater= intialWater- dis[0] -plant
         else:
             intialWater= intialWater- dis[0] +rained -plant #water changes based on water in the system minus the evap plus rain fall and minus the amount absobed by pkants
@@ -99,18 +103,18 @@ def water(intialWater, startT, time, Area, xH, xW ):
         xlist.append(8*step)
         #if there is no water in the system we are basically fucked
         if intialWater < Area*50:
-            return "DEATH"
+            dcount= 1
     #plt.title("Temp")
     #plt.xlabel("Time (H)")
     #plt.ylabel("Temperature (K)")
     #plt.plot(xlist, tL)
     
     #plt.show()
-    #plt.title("WFPS")
-    #plt.xlabel("Time (H)")
-    #plt.ylabel("WFPS (%)")
-    #plt.plot(xlist, waterlist)
-    #plt.show()
+    plt.title("WFPS")
+    plt.xlabel("Time (H)")
+    plt.ylabel("WFPS (%)")
+    plt.plot(xlist, waterlist)
+    plt.show()
     #after simulating the timestep we will return the final amount of water in the system.
     ratio = intialWater/Area
     norm = ratio/1000
