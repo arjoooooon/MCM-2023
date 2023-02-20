@@ -31,7 +31,11 @@ def water(intialWater, startT, time, Area, xH, xW ):
     X1= 0 #Current length left of extreme temp
     X2= 0 #Current length left of extreme rain
     X3 =0 #are we leaving a drought
-    xW[0]= .75+ (xW[0])*.25 #normalizes the rain function
+    if xW[0]==0:
+        xW[0]=0
+    else:
+        xW[0]= .8+ (2*xW[0]*.2) #normalizes the rain function
+    xW[2]= xW[2]*(8.5/3)
 
     for step in range(0,numstep): #for each time step
 
@@ -77,11 +81,11 @@ def water(intialWater, startT, time, Area, xH, xW ):
                 fall =Xrain(xW[2],xW[0], pressure, timestep)
                 X2 += -1
             else:
-                intensity = Area*random.randint(1,6)
+                intensity = Area*2.4
                 alpha = 1 #shape parameter for gamma function
                 beta = intensity  #scale parameter for gamma function
                 fall= rain(alpha, beta, timestep, pressure)
-            rained = fall[0]
+            rained = fall[0] *.9
             pressure = fall[1]
             
         else:
@@ -92,23 +96,28 @@ def water(intialWater, startT, time, Area, xH, xW ):
             plant= Area *2.5
         else:
             plant =0
-        if dcount != 0:
-            intialWater= 0
-        elif intialWater > Area*1000:
+        if intialWater > Area*1000:
+
             intialWater= intialWater- dis[0] -plant
         else:
             intialWater= intialWater- dis[0] +rained -plant #water changes based on water in the system minus the evap plus rain fall and minus the amount absobed by pkants
         ratio1= intialWater/Area
         if ratio1/1000 > float(1):
             wfps= 1
+        elif ratio1/1000 < 0:
+            wfps =0
         else:
             wfps = ratio1/1000
         waterlist.append(wfps)
         xlist.append(8*step)
         #if there is no water in the system we are basically fucked
-        if intialWater < Area*50:
-            dcount= 1
     #after simulating the timestep we will return the final amount of water in the system.
+    plt.show()
+    plt.title("WFPS")
+    plt.xlabel("Time (H)")
+    plt.ylabel("WFPS (%)")
+    plt.plot(xlist, waterlist)
+    plt.show()
     return waterlist
 
 #Helper Functions
@@ -152,5 +161,5 @@ def Xheat(temp, Intensity, pressure):
 
 def Xrain(alpha, beta , pressure, time):
     fall = rain(alpha,beta, time, pressure)
-    fall = [beta*beta*fall[0], fall[1]*.98 ]
+    fall = [beta*beta*beta*fall[0], fall[1]*.98 ]
     return fall
